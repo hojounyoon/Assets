@@ -95,8 +95,14 @@ public class PlayerController : MonoBehaviour
 
     void OnMove(InputValue value)
     {
-        if (GameManager.Instance.state == GameManager.GameState.PREGAME || GameManager.Instance.state == GameManager.GameState.GAMEOVER) return;
+        Debug.Log($"OnMove called - GameState: {GameManager.Instance.state}, Input: {value.Get<Vector2>()}");
+        if (GameManager.Instance.state == GameManager.GameState.PREGAME || GameManager.Instance.state == GameManager.GameState.GAMEOVER) 
+        {
+            Debug.Log("Movement blocked due to game state");
+            return;
+        }
         unit.movement = value.Get<Vector2>()*speed;
+        Debug.Log($"Movement set to: {unit.movement}");
     }
 
     void Die()

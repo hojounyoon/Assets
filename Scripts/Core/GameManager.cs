@@ -38,11 +38,31 @@ public class GameManager
 
     public void AddEnemy(GameObject enemy)
     {
+        if (enemies == null)
+        {
+            enemies = new List<GameObject>();
+        }
         enemies.Add(enemy);
+        Debug.Log($"Enemy added. Total enemies: {enemies.Count}");
     }
+
     public void RemoveEnemy(GameObject enemy)
     {
-        enemies.Remove(enemy);
+        if (enemies != null)
+        {
+            enemies.Remove(enemy);
+            Debug.Log($"Enemy removed. Total enemies: {enemies.Count}");
+        }
+    }
+
+    public void ClearEnemies()
+    {
+        if (enemies != null)
+        {
+            int count = enemies.Count;
+            enemies.Clear();
+            Debug.Log($"Cleared {count} enemies. Total enemies now: {enemies.Count}");
+        }
     }
 
     public GameObject GetClosestEnemy(Vector3 point)

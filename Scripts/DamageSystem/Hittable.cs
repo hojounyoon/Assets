@@ -19,7 +19,16 @@ public class Hittable
         if (hp <= 0)
         {
             hp = 0;
-            OnDeath();
+            // Check if this is an enemy
+            var enemy = owner.GetComponent<EnemyController>();
+            if (enemy != null)
+            {
+                enemy.Die();
+            }
+            else
+            {
+                OnDeath?.Invoke();
+            }
         }
     }
 

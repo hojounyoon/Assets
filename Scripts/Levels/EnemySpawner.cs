@@ -108,11 +108,20 @@ public class EnemySpawner : MonoBehaviour
             GameManager.Instance.countdown--;
         }
         GameManager.Instance.state = GameManager.GameState.INWAVE;
-        for (int i = 0; i < 10; ++i)
+        
+        // Only spawn new enemies if we have less than 10
+        int enemiesToSpawn = Mathf.Max(0, 10 - GameManager.Instance.enemy_count);
+        Debug.Log($"Starting wave. Current enemies: {GameManager.Instance.enemy_count}, Enemies to spawn: {enemiesToSpawn}");
+        
+        for (int i = 0; i < enemiesToSpawn; ++i)
         {
             yield return SpawnZombie();
+            Debug.Log($"Spawned enemy {i + 1}/{enemiesToSpawn}. Total enemies: {GameManager.Instance.enemy_count}");
         }
+        
+        // Wait until all enemies are destroyed
         yield return new WaitWhile(() => GameManager.Instance.enemy_count > 0);
+        Debug.Log("Wave complete - all enemies destroyed");
         GameManager.Instance.state = GameManager.GameState.WAVEEND;
     }
 
@@ -139,5 +148,14 @@ public class EnemySpawner : MonoBehaviour
         currentWaveIndex = 0;
         isSpawning = false;
         Debug.Log($"Wave reset - currentWave: {currentWave}, currentWaveIndex: {currentWaveIndex}");
+    }
+
+    public void StartNewWave()
+    {
+        if (!isSpawning)
+        {
+            isSpawning = true;
+            StartCoroutine(SpawnWave());
+        }
     }
 }

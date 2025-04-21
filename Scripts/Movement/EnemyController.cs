@@ -42,7 +42,7 @@ public class EnemyController : MonoBehaviour
     }
 
 
-    void Die()
+    public void Die()
     {
         if (!dead)
         {
@@ -52,8 +52,19 @@ public class EnemyController : MonoBehaviour
             {
                 StatManager.Instance.OnEnemyDefeated();
             }
+            
+            // Remove from GameManager first
             GameManager.Instance.RemoveEnemy(gameObject);
+            
+            // Clean up components
+            if (hp != null)
+            {
+                hp.OnDeath -= Die; // Unsubscribe from the event
+            }
+            
+            // Destroy the game object
             Destroy(gameObject);
+            Debug.Log("Enemy destroyed and cleaned up");
         }
     }
 }

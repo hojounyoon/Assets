@@ -21,7 +21,7 @@ public class GameOverManager : MonoBehaviour
             victoryScreen.SetActive(false);
         
         // Find the EnemySpawner
-        enemySpawner = FindObjectOfType<EnemySpawner>();
+        enemySpawner = FindAnyObjectByType<EnemySpawner>();
         
         // Set up the restart buttons
         if (gameOverRestartButton != null)
@@ -101,8 +101,9 @@ public class GameOverManager : MonoBehaviour
             StatManager.Instance.isVictory = false;
         }
         
-        // Reset game state
-        GameManager.Instance.state = GameManager.GameState.PREGAME;
+        // Reset game state and countdown
+        GameManager.Instance.state = GameManager.GameState.COUNTDOWN;
+        GameManager.Instance.countdown = 3;
         
         // Hide game over and victory screens
         if (gameOverScreen != null)
@@ -110,7 +111,7 @@ public class GameOverManager : MonoBehaviour
         if (victoryScreen != null)
             victoryScreen.SetActive(false);
             
-        // Reset player health and position
+        // Reset player health, position, and movement
         if (GameManager.Instance.player != null)
         {
             PlayerController player = GameManager.Instance.player.GetComponent<PlayerController>();
@@ -124,84 +125,36 @@ public class GameOverManager : MonoBehaviour
                 
                 // Reset position to origin
                 player.transform.position = Vector3.zero;
+                
+                // Reset Unit component
+                Unit unit = player.GetComponent<Unit>();
+                if (unit != null)
+                {
+                    unit.movement = Vector2.zero;
+                    unit.distance = 0;
+                }
             }
         }
 
-        // Destroy all existing enemies
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
+        // Find and destroy all existing enemies
+        EnemyController[] existingEnemies = FindObjectsOfType<EnemyController>();
+        foreach (EnemyController enemy in existingEnemies)
         {
-            Destroy(enemy);
+            Destroy(enemy.gameObject);
         }
-        
-        // Start the game
-        GameManager.Instance.state = GameManager.GameState.COUNTDOWN;
+        GameManager.Instance.ClearEnemies();
+        Debug.Log($"Destroyed {existingEnemies.Length} existing enemies");
+
+        // Start the first wave
+        if (enemySpawner != null)
+        {
+            enemySpawner.ResetWaves();
+            enemySpawner.StartNewWave();
+        }
     }
 
     public void RestartFromVictory()
     {
-        Debug.Log("Restarting from victory...");
-        
-        // Reset the StatManager
-        if (StatManager.Instance != null)
-        {
-            StatManager.Instance.ResetStats();
-            StatManager.Instance.isGameOver = false;
-            StatManager.Instance.isVictory = false;
-            Debug.Log("StatManager reset complete");
-        }
-        
-        // Reset game state
-        GameManager.Instance.state = GameManager.GameState.PREGAME;
-        Debug.Log("Game state set to PREGAME");
-        
-        // Hide game over and victory screens
-        if (gameOverScreen != null)
-            gameOverScreen.SetActive(false);
-        if (victoryScreen != null)
-            victoryScreen.SetActive(false);
-        Debug.Log("Screens hidden");
-            
-        // Reset player health and position
-        if (GameManager.Instance.player != null)
-        {
-            PlayerController player = GameManager.Instance.player.GetComponent<PlayerController>();
-            if (player != null)
-            {
-                // Reset health
-                if (player.hp != null)
-                {
-                    player.hp.hp = 100; // Set to default max health
-                    Debug.Log("Player health reset to 100");
-                }
-                
-                // Reset position to origin
-                player.transform.position = Vector3.zero;
-                Debug.Log("Player position reset to origin");
-            }
-        }
-
-        // Destroy all existing enemies
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            Destroy(enemy);
-        }
-        Debug.Log($"Destroyed {enemies.Length} existing enemies");
-
-        // Reset the wave count in EnemySpawner
-        if (enemySpawner != null)
-        {
-            enemySpawner.ResetWaves();
-            Debug.Log("EnemySpawner waves reset");
-        }
-        else
-        {
-            Debug.LogError("EnemySpawner not found!");
-        }
-        
-        // Start the game
-        GameManager.Instance.state = GameManager.GameState.COUNTDOWN;
-        Debug.Log("Game state set to COUNTDOWN");
+        RestartGame(); // Use the same restart logic for both game over and victory
     }
 } 

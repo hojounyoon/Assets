@@ -30,6 +30,10 @@ public class ProjectileController : MonoBehaviour
             if (ec != null)
             {
                 OnHit(ec.hp, transform.position);
+                if (ec.hp.hp <= 0)
+                {
+                    ec.Die();
+                }
             }
             else
             {
@@ -39,7 +43,6 @@ public class ProjectileController : MonoBehaviour
                     OnHit(pc.hp, transform.position);
                 }
             }
-
         }
         Destroy(gameObject);
     }
